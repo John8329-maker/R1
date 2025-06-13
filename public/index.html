@@ -31,25 +31,16 @@
       background-color: #e5e7eb;
       border-radius: 12px 12px 12px 0;
     }
-  .user-message {
-    background-color: #dbeafe;
-    border-radius: 12px 12px 0 12px;
-  }
-  .bot-message {
-    background-color: #e5e7eb;
-    border-radius: 12px 12px 12px 0;
-  }
-  .model-indicator {
-    font-size: 0.8rem;
-    color: #666;
-    margin-top: 5px;
-    font-style: italic;
-  }
+    .model-indicator {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 5px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col items-center p-4">
   <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden">
-    <!-- Header -->
     <div class="bg-teal-600 text-white p-4 flex justify-between items-center">
       <h1 class="text-xl font-bold">Virum Chat</h1>
       <button id="clear-btn" class="bg-teal-800 hover:bg-teal-700 px-3 py-1 rounded-lg">
@@ -57,22 +48,19 @@
       </button>
     </div>
     
-    <!-- Loading Indicator -->
     <div id="loading" class="hidden p-4 bg-yellow-50 text-center">
       <i class="fas fa-spinner fa-spin mr-2"></i> Обробка запиту...
     </div>
     
-    <!-- Chat Container -->
     <div id="chat-container" class="chat-container p-4 h-96">
       <div class="bot-message p-3 mb-3">
         <div class="font-semibold text-teal-700 flex items-center">
-          <i class="fas fa-robot mr-2"></i> Virum
+          <i class="fas fa-robot mr-2"></i> Virum AI
         </div>
-        <p>Привіт! Я Virum, ваш AI помічник. Чим можу допомогти?</p>
+        <p>Привіт! Я ваш AI помічник. Чим можу допомогти?</p>
       </div>
     </div>
     
-    <!-- Input Area -->
     <div class="p-4 border-t border-gray-200 flex">
       <input 
         id="message-input"
