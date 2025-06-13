@@ -16,6 +16,7 @@ exports.handler = async (event) => {
     };
   }
 
+  // Перевірка методу
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -24,6 +25,7 @@ exports.handler = async (event) => {
     };
   }
 
+  // Перевірка тіла запиту
   if (!event.body) {
     return {
       statusCode: 400,
@@ -43,8 +45,9 @@ exports.handler = async (event) => {
     };
   }
 
-  const { messages } = parsedBody; // Тепер приймаємо весь масив повідомлень
+  const { messages } = parsedBody;
   
+  // Перевірка messages
   if (!Array.isArray(messages) || messages.length === 0) {
     return {
       statusCode: 400,
@@ -101,7 +104,7 @@ exports.handler = async (event) => {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Помилка ${provider.name}: ${response.status} - ${errorText.slice(0, 100)}`);
-        continue; // Спробуємо наступного провайдера
+        continue;
       }
 
       const data = await response.json();
