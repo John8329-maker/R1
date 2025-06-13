@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatContainer.innerHTML = '';
     
     // Додати стартове повідомлення
-    addMessage('Привіт! Я Virum, ваш AI помічник. Чим можу допомогти?', false);
+       addMessage('Привіт! Я DeepSeek-R1, ваш AI помічник. Задавайте свої запитання!', false);
     
     // Додати історію
     history.forEach(item => {
@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const senderDiv = document.createElement('div');
     senderDiv.className = 'font-semibold flex items-center';
     senderDiv.innerHTML = isUser 
-      ? '<i class="fas fa-user mr-2"></i> Ви' 
-      : '<i class="fas fa-robot mr-2"></i> Virum';
+  ? '<i class="fas fa-user mr-2"></i> Ви' 
+  : '<i class="fas fa-robot mr-2"></i> DeepSeek-R1';
     
     const textDiv = document.createElement('div');
     textDiv.textContent = text;
