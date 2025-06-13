@@ -53,6 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const textDiv = document.createElement('div');
     textDiv.textContent = text;
     
+    // Додати індикатор моделі (для AI повідомлень)
+    if (!isUser && model) {
+      const modelDiv = document.createElement('div');
+      modelDiv.className = 'model-indicator';
+      modelDiv.textContent = `Модель: ${model}`;
+      messageDiv.appendChild(modelDiv);
+    }
+    
     messageDiv.appendChild(senderDiv);
     messageDiv.appendChild(textDiv);
     chatContainer.appendChild(messageDiv);
@@ -81,23 +89,27 @@ document.addEventListener('DOMContentLoaded', () => {
       // Отримати всю історію діалогу
       const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
       
-      // Додати нове повідомлення користувача
-      const userMessage = {
-        role: 'user',
-        content: message,
-        timestamp: new Date().toISOString()
-      };
+      // Створити масив повідомлень для AI
+      const messages = history
+        .filter(msg => msg.content)
+        .map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }));
       
-      // Оновлена історія: всі попередні + нове повідомлення
-      const allMessages = [...history, userMessage];
+      // Додати нове повідомлення користувача
+      messages.push({
+        role: 'user',
+        content: message
+      });
       
       // Виконати запит до сервера
-      const response = await fetch('/api/ask', {
+      const response = await fetch('/.netlify/functions/ask', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ messages: allMessages })
+        body: JSON.stringify({ messages })
       });
       
       if (!response.ok) {
@@ -105,21 +117,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       const data = await response.json();
-      const answer = data.answer;
-      const model = data.model || 'Невідома модель';
       
       // Додати відповідь асистента
-      addMessage(answer, false, model);
+      addMessage(data.answer, false, data.model);
       
-      // Зберегти відповідь в історію
-      const assistantMessage = {
-        role: 'assistant',
-        content: answer,
-        model: model,
-        timestamp: new Date().toISOString()
-      };
-      
-      const newHistory = [...allMessages, assistantMessage];
+      // Оновити історію
+      const newHistory = [
+        ...history,
+        {
+          role: 'user',
+          content: message,
+          timestamp: new Date().toISOString()
+        },
+        {
+          role: 'assistant',
+          content: data.answer,
+          model: data.model,
+          timestamp: new Date().toISOString()
+        }
+      ];
       
       // Зберегти історію (обмежити до останніх 20 повідомлень)
       localStorage.setItem('chatHistory', JSON.stringify(newHistory.slice(-20)));
