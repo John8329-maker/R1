@@ -1,6 +1,6 @@
-exports.handler = async (event) => {
+exports.handler = async function(event) {
   // Налаштування CORS
-  const corsHeaders = {
+  const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -11,7 +11,7 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
-      headers: corsHeaders,
+      headers,
       body: ''
     };
   }
@@ -20,124 +20,73 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Метод не дозволений' })
+      headers,
+      body: JSON.stringify({ error: 'Метод не підтримується' })
     };
   }
 
-  // Перевірка тіла запиту
-  if (!event.body) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Відсутнє тіло запиту' })
-    };
-  }
-
-  let parsedBody;
   try {
-    parsedBody = JSON.parse(event.body);
-  } catch (e) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Некоректний JSON у тілі запиту' })
-    };
-  }
+    // Парсимо тіло запиту
+    const { message } = JSON.parse(event.body);
+    
+    if (!message) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Порожнє повідомлення' })
+      };
+    }
 
-  const { messages } = parsedBody;
-  
-  // Перевірка messages
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Будь ласка, надайте історію діалогу' })
-    };
-  }
+    // Отримуємо API ключ
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    if (!apiKey) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'Відсутній API ключ' })
+      };
+    }
 
-  // Конфігурація моделей
-  const AI_PROVIDERS = [
-    {
-      name: "DeepSeek-R1",
-      url: "https://api.deepseek.com/v1/chat/completions",
-      apiKey: process.env.DEEPSEEK_API_KEY,
-      requestBody: {
+    // Виклик DeepSeek API
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
         model: "deepseek-chat",
-        messages: messages,
+        messages: [{ role: "user", content: message }],
         max_tokens: 1024,
         temperature: 0.7,
         stream: false
-      }
-    },
-    {
-      name: "TogetherAI-Llama3.3",
-      url: "https://api.together.xyz/v1/chat/completions",
-      apiKey: process.env.TOGETHER_API_KEY,
-      requestBody: {
-        model: "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-        messages: messages,
-        max_tokens: 1024,
-        temperature: 0.7
-      }
-    }
-  ];
+      })
+    });
 
-  // Спроба відправити запит через доступних провайдерів
-  for (const provider of AI_PROVIDERS) {
-    if (!provider.apiKey) {
-      console.log(`Пропускаємо ${provider.name} - відсутній API ключ`);
-      continue;
-    }
-
-    try {
-      console.log(`Спроба використати ${provider.name}...`);
-      const response = await fetch(provider.url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${provider.apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(provider.requestBody)
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Помилка ${provider.name}: ${response.status} - ${errorText.slice(0, 100)}`);
-        continue;
-      }
-
-      const data = await response.json();
-      const answer = provider.name.includes("DeepSeek") 
-        ? data.choices[0].message.content
-        : data.choices?.[0]?.message?.content;
-
-      if (!answer) {
-        console.error(`Пуста відповідь від ${provider.name}`);
-        continue;
-      }
-
-      console.log(`Успішно отримано відповідь від ${provider.name}`);
+    // Обробка відповіді
+    if (!response.ok) {
+      const errorData = await response.text();
       return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify({ 
-          answer,
-          model: provider.name 
-        })
+        statusCode: response.status,
+        headers,
+        body: JSON.stringify({ error: `Помилка DeepSeek API: ${response.status}` })
       };
-      
-    } catch (error) {
-      console.error(`Помилка з ${provider.name}:`, error.message);
     }
-  }
 
-  // Якщо всі спроби не вдалися
-  return {
-    statusCode: 503,
-    headers: corsHeaders,
-    body: JSON.stringify({ 
-      error: 'Усі сервіси AI тимчасово недоступні. Спробуйте пізніше.' 
-    })
-  };
+    const data = await response.json();
+    const answer = data.choices[0].message.content;
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ answer })
+    };
+
+  } catch (error) {
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: 'Внутрішня помилка сервера: ' + error.message })
+    };
+  }
 };
