@@ -18,3 +18,10 @@
   for = "/*.js"
   [headers.values]
     "Content-Type" = "application/javascript; charset=utf-8"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "POST, OPTIONS"
