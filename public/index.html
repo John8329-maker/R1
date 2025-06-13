@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     .chat-container {
-      max-height: 400px;
+      height: 400px;
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: #c5c5c5 #f1f1f1;
@@ -26,52 +26,44 @@
     .user-message {
       background-color: #dbeafe;
       border-radius: 12px 12px 0 12px;
+      margin-left: 20%;
+      margin-bottom: 10px;
+      padding: 10px;
     }
     .bot-message {
       background-color: #e5e7eb;
       border-radius: 12px 12px 12px 0;
-    }
-    .model-indicator {
-      font-size: 0.8rem;
-      color: #666;
-      margin-top: 5px;
-      font-style: italic;
+      margin-right: 20%;
+      margin-bottom: 10px;
+      padding: 10px;
     }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col items-center p-4">
-  <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden">
-    <div class="bg-teal-600 text-white p-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold">Virum Chat</h1>
-      <button id="clear-btn" class="bg-teal-800 hover:bg-teal-700 px-3 py-1 rounded-lg">
-        Очистити історію
-      </button>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+  <div class="w-full max-w-2xl bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="bg-teal-600 text-white p-4">
+      <h1 class="text-xl font-bold text-center">Virum Chat</h1>
     </div>
     
-    <div id="loading" class="hidden p-4 bg-yellow-50 text-center">
-      <i class="fas fa-spinner fa-spin mr-2"></i> Обробка запиту...
+    <div id="loading" class="hidden p-2 bg-yellow-100 text-center">
+      <i class="fas fa-spinner fa-spin"></i> Обробка запиту...
     </div>
     
-    <div id="chat-container" class="chat-container p-4 h-96">
-      <div class="bot-message p-3 mb-3">
-        <div class="font-semibold text-teal-700 flex items-center">
-          <i class="fas fa-robot mr-2"></i> Virum AI
-        </div>
-        <p>Привіт! Я ваш AI помічник. Чим можу допомогти?</p>
+    <div id="chat-container" class="chat-container p-4">
+      <div class="bot-message">
+        <p>Привіт! Я Virum, твій AI помічник. Чим можу допомогти?</p>
       </div>
     </div>
     
-    <div class="p-4 border-t border-gray-200 flex">
+    <div class="p-4 border-t flex">
       <input 
         id="message-input"
-        type="text" 
-        class="flex-grow border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-300"
-        placeholder="Напишіть ваше повідомлення..."
+        type="text"
+        class="flex-1 border rounded-l-lg p-2 focus:outline-none focus:ring-2 focus:ring-teal-300"
+        placeholder="Введіть повідомлення..."
+        autocomplete="off"
       >
-      <button 
-        id="send-btn" 
-        class="bg-teal-600 hover:bg-teal-700 text-white px-6 rounded-r-lg"
-      >
+      <button id="send-btn" class="bg-teal-600 text-white px-4 rounded-r-lg hover:bg-teal-700">
         <i class="fas fa-paper-plane"></i>
       </button>
     </div>
